@@ -1,7 +1,7 @@
 # Classical post-processing controls
 
 Two controls for the question "could standard post-processing, tuned on val, do what the evolved harness does?"
-(main paper Tab. 2, supplement Tab. S7). They run through the same harness runtime (`rsi/harness/run.py`), on the same
+(technical report, Tab. 13). They run through the same harness runtime (`rsi/harness/run.py`), on the same
 captures and with the same evaluator as HandRSI, and they are selected the way the loop selects: on HOT3D val with the
 gate's composite gain Δ (ARCTIC val as a regression check), then one run per selected config on the sealed tests.
 

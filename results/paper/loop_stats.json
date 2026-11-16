@@ -1,5 +1,5 @@
 {
- "_doc": "Loop A per round (supp Loop A table: agents, submissions, acceptances, output tokens, turns) and the module families of the final harness (main Sec. 4.3).",
+ "_doc": "Loop A per round (technical report Tab. 7: agents, submissions, acceptances, output tokens, turns) and the module families of the final harness (Sec. 5.3).",
  "loopA": {
   "R1": {
    "agents": 8,

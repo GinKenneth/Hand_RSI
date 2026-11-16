@@ -1,5 +1,5 @@
 {
- "_doc": "HOT3D test under the strict detection rule (unannotated hand slots scored as absent), supp strict table.",
+ "_doc": "HOT3D test under the strict detection rule (unannotated hand slots scored as absent), technical report Tab. 18.",
  "00": {
   "FAcc": 0.9589150251800854,
   "Recall": 0.9860517232497038,

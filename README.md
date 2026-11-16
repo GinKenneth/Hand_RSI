@@ -1,6 +1,8 @@
 <div align="center">
 
-# HandRSI: coding agents that improve a video hand-pose network, round by round
+# HandRSI: Recursive Self-Improvement for Hand Pose Estimation
+
+Coding agents improve a video hand-pose network and its inference harness, round by round.
 
 **[Weights and harnesses (Hugging Face)](https://huggingface.co/HandRSI/HandRSI)** · **Technical report: arXiv link to follow**
 
@@ -90,10 +92,31 @@ released). They differ from the values in ACE-Ego-Hand's paper, whose splits are
 
 - Rounds 3-5 did not improve the network (θ3 = θ4 = θ5 = θ2); their gains come from the harness. Round-by-round tables
   with their controls: [`results/README.md`](results/README.md).
+- Beyond fine-tuning: ACE-Ego-Hand fine-tuned on the same ground truth alone (control C1₁) reaches HOT3D MPJPE-p 9.91
+  and Jitter 2.77; HandRSI is 16 % and 51 % lower.
+- Classical post-processing does not explain the gain: on θ2, the best val-selected Savitzky-Golay filter gives HOT3D
+  MPJPE-p 9.34 and a naive WiLoR ensemble 9.32, against 8.37 for HandRSI ([`baselines/classical/`](baselines/classical/README.md)).
 - HOI4D is zero-shot: 3D pose and smoothness improve, 2D accuracy and detection are slightly worse than ACE-Ego-Hand.
 - Detection columns do not score predictions on hands without a ground-truth annotation (`ace_eval/README.md`).
 
 ᵃ OmniHands' HOT3D Jitter comes from 0.17 % of hand-frames where its PnP placement diverges (z > 5 m).
+
+## Deployment tiers
+
+Sub-chains of the final harness, selected on val by hypervolume over the measured accuracy-speed front (technical
+report, Sec. 3.5 and 5.5); the three tiers cover 98.5 % of the front's hypervolume. FPS end to end, network included,
+on one RTX PRO 5000; sealed test.
+
+| system | modules | FPS | HOT3D MPJPE-p / Jitter | ARCTIC MPJPE-p / Jitter |
+|---|---|---|---|---|
+| network θ2 alone | 0 | 42.7 | 9.37 / 2.51 | 15.15 / 2.36 |
+| Lite | 20 | 41.1 | 9.06 / 1.47 | 14.53 / 1.58 |
+| Medium | 28 | 34.0 | 9.04 / 1.33 | 14.47 / 1.45 |
+| Heavy (with WiLoR) | 29 | 20.7 | 8.41 / 1.35 | 14.00 / 1.46 |
+| full harness H5\* (with WiLoR) | 39 | 16.2 | 8.37 / 1.34 | 13.85 / 1.45 |
+
+The tiers are in `rsi/harness/trees/{Lite,Medium,Heavy}`; run one with `--harness rsi/harness/trees/Lite` (see below).
+Search, front and the test scores of every front point: [`results/paper/tiers.json`](results/paper/README.md).
 
 ## Models used
 
@@ -110,7 +133,7 @@ baselines/       published hand estimators re-run under ACE-Ego-Hand's baseline 
 rsi/             the self-improvement loop: harness/ (runtime, trees/H5 = final harness, trees/Lite|Medium|Heavy =
                  deployment tiers), capture/, data/, eval/, loopA/ (agents, sandbox, gate), loopB/ (distillation),
                  loopC/ (research lead), rounds/
-results/         test tables; paper/ = the result files behind the remaining tables of the paper
+results/         test tables; paper/ = the result files behind the remaining tables of the technical report
 ```
 
 ## Requirements
@@ -152,6 +175,10 @@ huggingface-cli download HandRSI/HandRSI --local-dir checkpoints/handrsi
 ```bash
 # HandRSI: network θ2 + harness H5*
 python infer_video.py --video clip.mp4 --intrinsics fx,fy,cx,cy --ckpt checkpoints/handrsi/theta2 --out results/clip
+
+# a deployment tier instead of the full harness
+python infer_video.py --video clip.mp4 --intrinsics fx,fy,cx,cy --ckpt checkpoints/handrsi/theta2 \
+    --harness rsi/harness/trees/Lite --out results/clip_lite
 
 # the ACE-Ego-Hand baseline: released checkpoint, no harness
 python infer_video.py --video clip.mp4 --camera cam.json --ckpt release --harness empty --out results/clip_ace

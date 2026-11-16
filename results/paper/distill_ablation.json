@@ -1,5 +1,5 @@
 {
- "_doc": "Main Tab. 4: round-1 Loop B recipes on HOT3D dev from the same GT-fine-tuned network and budget; delta_pct = \u0394 against GT only; indented rows build on \"+ presence, temp. 0.3\".",
+ "_doc": "Technical report Tab. 9: round-1 Loop B recipes on HOT3D dev from the same GT-fine-tuned network and budget; delta_pct = \u0394 against GT only; indented rows build on \"+ presence, temp. 0.3\".",
  "rows": [
   {
    "recipe": "GT only",

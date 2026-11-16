@@ -1,5 +1,5 @@
 {
- "_doc": "Tier search (main Sec. 3.5, Tab. 1 tiers, Fig. 7; supp tier tables). points: every timed sub-chain (n modules, val S = \u0394 with lower bound, FPS end to end on 81-frame segments); tiers_eps: the \u03b5-front selection used in the paper; test: 10 columns of each selected chain on the sealed tests, key <chain>_<view>.",
+ "_doc": "Tier search (technical report Sec. 3.5 and 5.5, Tab. 3 tier rows, Fig. 9, Tab. 11). points: every timed sub-chain (n modules, val S = \u0394 with lower bound, FPS end to end on 81-frame segments); tiers_eps: the \u03b5-front selection used in the paper; test: 10 columns of each selected chain on the sealed tests, key <chain>_<view>.",
  "tiers_eps": {
   "eps": 0.01,
   "reference_point": {

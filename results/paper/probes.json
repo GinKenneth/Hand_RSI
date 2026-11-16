@@ -1,5 +1,5 @@
 {
- "_doc": "Input-side probes (supp probe tables): F_cs camera-space input and the per-stage probe runs.",
+ "_doc": "Input-side probes (additional analysis): F_cs camera-space input and the per-stage probe runs.",
  "probe_main": {
   "flags": {},
   "default|net": {
