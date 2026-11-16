@@ -1,0 +1,504 @@
+{
+ "_doc": "Chains of the classical post-processing controls. 'smoothers': one filter on every scored quantity; 'align2d': camera translation re-fitted to the network's own 2D keypoints (+ smoothing); 'ensemble': naive two-model ensemble with WiLoR articulation (+ the val-best smoother). Each family is swept on val and its HOT3D-val-best member runs on the tests.",
+ "smoothers": {
+  "gauss_s0.5": [
+   {
+    "name": "cl_gauss",
+    "enabled": true,
+    "params": {
+     "sigma": 0.5
+    }
+   }
+  ],
+  "gauss_s0.7": [
+   {
+    "name": "cl_gauss",
+    "enabled": true,
+    "params": {
+     "sigma": 0.7
+    }
+   }
+  ],
+  "gauss_s1.0": [
+   {
+    "name": "cl_gauss",
+    "enabled": true,
+    "params": {
+     "sigma": 1.0
+    }
+   }
+  ],
+  "gauss_s1.5": [
+   {
+    "name": "cl_gauss",
+    "enabled": true,
+    "params": {
+     "sigma": 1.5
+    }
+   }
+  ],
+  "gauss_s2.0": [
+   {
+    "name": "cl_gauss",
+    "enabled": true,
+    "params": {
+     "sigma": 2.0
+    }
+   }
+  ],
+  "gauss_s3.0": [
+   {
+    "name": "cl_gauss",
+    "enabled": true,
+    "params": {
+     "sigma": 3.0
+    }
+   }
+  ],
+  "savgol_w5p2": [
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 5,
+     "order": 2
+    }
+   }
+  ],
+  "savgol_w7p2": [
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 7,
+     "order": 2
+    }
+   }
+  ],
+  "savgol_w9p2": [
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 9,
+     "order": 2
+    }
+   }
+  ],
+  "savgol_w11p2": [
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 11,
+     "order": 2
+    }
+   }
+  ],
+  "savgol_w15p2": [
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 15,
+     "order": 2
+    }
+   }
+  ],
+  "savgol_w9p3": [
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 9,
+     "order": 3
+    }
+   }
+  ],
+  "savgol_w13p3": [
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 13,
+     "order": 3
+    }
+   }
+  ],
+  "savgol_w17p3": [
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 17,
+     "order": 3
+    }
+   }
+  ],
+  "oneeuro_mc0.5_b0.0": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 0.5,
+     "beta": 0.0
+    }
+   }
+  ],
+  "oneeuro_mc0.5_b0.05": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 0.5,
+     "beta": 0.05
+    }
+   }
+  ],
+  "oneeuro_mc0.5_b0.5": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 0.5,
+     "beta": 0.5
+    }
+   }
+  ],
+  "oneeuro_mc0.5_b5.0": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 0.5,
+     "beta": 5.0
+    }
+   }
+  ],
+  "oneeuro_mc1.0_b0.0": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 1.0,
+     "beta": 0.0
+    }
+   }
+  ],
+  "oneeuro_mc1.0_b0.05": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 1.0,
+     "beta": 0.05
+    }
+   }
+  ],
+  "oneeuro_mc1.0_b0.5": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 1.0,
+     "beta": 0.5
+    }
+   }
+  ],
+  "oneeuro_mc1.0_b5.0": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 1.0,
+     "beta": 5.0
+    }
+   }
+  ],
+  "oneeuro_mc2.0_b0.0": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 2.0,
+     "beta": 0.0
+    }
+   }
+  ],
+  "oneeuro_mc2.0_b0.05": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 2.0,
+     "beta": 0.05
+    }
+   }
+  ],
+  "oneeuro_mc2.0_b0.5": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 2.0,
+     "beta": 0.5
+    }
+   }
+  ],
+  "oneeuro_mc2.0_b5.0": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 2.0,
+     "beta": 5.0
+    }
+   }
+  ],
+  "oneeuro_mc4.0_b0.0": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 4.0,
+     "beta": 0.0
+    }
+   }
+  ],
+  "oneeuro_mc4.0_b0.05": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 4.0,
+     "beta": 0.05
+    }
+   }
+  ],
+  "oneeuro_mc4.0_b0.5": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 4.0,
+     "beta": 0.5
+    }
+   }
+  ],
+  "oneeuro_mc4.0_b5.0": [
+   {
+    "name": "cl_oneeuro",
+    "enabled": true,
+    "params": {
+     "mincutoff": 4.0,
+     "beta": 5.0
+    }
+   }
+  ]
+ },
+ "align2d": {
+  "root2d_a0.5": [
+   {
+    "name": "cl_root2d",
+    "enabled": true,
+    "params": {
+     "alpha": 0.5
+    }
+   }
+  ],
+  "root2d_a1.0": [
+   {
+    "name": "cl_root2d",
+    "enabled": true,
+    "params": {
+     "alpha": 1.0
+    }
+   }
+  ],
+  "root2dxy_a1.0": [
+   {
+    "name": "cl_root2d",
+    "enabled": true,
+    "params": {
+     "alpha": 1.0,
+     "fix_z": true
+    }
+   }
+  ],
+  "root2dxy_a1.0+savgol_w7p2": [
+   {
+    "name": "cl_root2d",
+    "enabled": true,
+    "params": {
+     "alpha": 1.0,
+     "fix_z": true
+    }
+   },
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 7,
+     "order": 2
+    }
+   }
+  ],
+  "root2d_a0.5+savgol_w7p2": [
+   {
+    "name": "cl_root2d",
+    "enabled": true,
+    "params": {
+     "alpha": 0.5
+    }
+   },
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 7,
+     "order": 2
+    }
+   }
+  ],
+  "root2d_a1.0+savgol_w7p2": [
+   {
+    "name": "cl_root2d",
+    "enabled": true,
+    "params": {
+     "alpha": 1.0
+    }
+   },
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 7,
+     "order": 2
+    }
+   }
+  ],
+  "root2d_a0.5+savgol_w9p2": [
+   {
+    "name": "cl_root2d",
+    "enabled": true,
+    "params": {
+     "alpha": 0.5
+    }
+   },
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 9,
+     "order": 2
+    }
+   }
+  ]
+ },
+ "ensemble": {
+  "ens_a0.25": [
+   {
+    "name": "cl_wilor",
+    "enabled": true,
+    "params": {
+     "alpha": 0.25
+    }
+   }
+  ],
+  "ens_a0.25+savgol_w7p2": [
+   {
+    "name": "cl_wilor",
+    "enabled": true,
+    "params": {
+     "alpha": 0.25
+    }
+   },
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 7,
+     "order": 2
+    }
+   }
+  ],
+  "ens_a0.5": [
+   {
+    "name": "cl_wilor",
+    "enabled": true,
+    "params": {
+     "alpha": 0.5
+    }
+   }
+  ],
+  "ens_a0.5+savgol_w7p2": [
+   {
+    "name": "cl_wilor",
+    "enabled": true,
+    "params": {
+     "alpha": 0.5
+    }
+   },
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 7,
+     "order": 2
+    }
+   }
+  ],
+  "ens_a0.75": [
+   {
+    "name": "cl_wilor",
+    "enabled": true,
+    "params": {
+     "alpha": 0.75
+    }
+   }
+  ],
+  "ens_a0.75+savgol_w7p2": [
+   {
+    "name": "cl_wilor",
+    "enabled": true,
+    "params": {
+     "alpha": 0.75
+    }
+   },
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 7,
+     "order": 2
+    }
+   }
+  ],
+  "ens_a1.0": [
+   {
+    "name": "cl_wilor",
+    "enabled": true,
+    "params": {
+     "alpha": 1.0
+    }
+   }
+  ],
+  "ens_a1.0+savgol_w7p2": [
+   {
+    "name": "cl_wilor",
+    "enabled": true,
+    "params": {
+     "alpha": 1.0
+    }
+   },
+   {
+    "name": "cl_savgol",
+    "enabled": true,
+    "params": {
+     "window": 7,
+     "order": 2
+    }
+   }
+  ]
+ }
+}

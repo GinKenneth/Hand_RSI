@@ -1,0 +1,45 @@
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+
+# secrets: Loop A / Loop C model routes and keys (see rsi/loopA/*.example*)
+keys.env
+endpoints.json
+
+# third-party code and weights placed by the user (see README)
+rsi/capture/ace_official
+rsi/third_party/
+rsi/checkpoints/
+checkpoints/
+ace_eval/data/mano/
+
+# datasets, network outputs and run state written next to the code
+rsi/datasets/
+rsi/data/views/
+rsi/data/*_ace/
+rsi/data/*_pgt/
+rsi/data/hot3d_nogt_wilor2d/
+rsi/captures/
+rsi/preds/
+rsi/models/
+rsi/sealed/
+rsi/loopA_runs/
+rsi/loopB/cache/
+rsi/loopB/runs/
+rsi/rounds/R*/
+rsi/rounds/STOP
+rsi/rounds/PLAN_LATEST.json
+rsi/bucket/
+rsi/library/
+rsi/logs/
+rsi/archive/
+results/videos/
+*.npz
+*.pt
+rsi/rounds/ARCHIVE.json
+
+# baselines/: third-party repositories, weights and outputs (see baselines/README.md)
+third_party/
+baselines_out/

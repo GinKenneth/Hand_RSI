@@ -1,0 +1,77 @@
+{
+ "_doc": "Main Tab. 4: round-1 Loop B recipes on HOT3D dev from the same GT-fine-tuned network and budget; delta_pct = \u0394 against GT only; indented rows build on \"+ presence, temp. 0.3\".",
+ "rows": [
+  {
+   "recipe": "GT only",
+   "indented": false,
+   "FAcc": 0.954,
+   "MPJPE-p": 10.24,
+   "EPE2D-p": 5.37,
+   "Jitter": 2.73,
+   "delta_pct": null
+  },
+  {
+   "recipe": "+ teacher articulation",
+   "indented": false,
+   "FAcc": 0.965,
+   "MPJPE-p": 10.6,
+   "EPE2D-p": 5.75,
+   "Jitter": 2.76,
+   "delta_pct": -1.62
+  },
+  {
+   "recipe": "+ articulation, temp. 0.3",
+   "indented": false,
+   "FAcc": 0.942,
+   "MPJPE-p": 10.38,
+   "EPE2D-p": 5.53,
+   "Jitter": 2.33,
+   "delta_pct": -0.7
+  },
+  {
+   "recipe": "+ presence, 2D, temp. 0.3",
+   "indented": false,
+   "FAcc": 0.944,
+   "MPJPE-p": 10.4,
+   "EPE2D-p": 5.58,
+   "Jitter": 2.32,
+   "delta_pct": -1.01
+  },
+  {
+   "recipe": "+ presence, temp. 0.3",
+   "indented": false,
+   "FAcc": 0.954,
+   "MPJPE-p": 10.19,
+   "EPE2D-p": 5.39,
+   "Jitter": 2.32,
+   "delta_pct": 1.39
+  },
+  {
+   "recipe": "temp. 0.1",
+   "indented": true,
+   "FAcc": 0.961,
+   "MPJPE-p": 10.24,
+   "EPE2D-p": 5.33,
+   "Jitter": 2.54,
+   "delta_pct": 1.95
+  },
+  {
+   "recipe": "+ border mask",
+   "indented": true,
+   "FAcc": 0.962,
+   "MPJPE-p": 10.58,
+   "EPE2D-p": 5.62,
+   "Jitter": 2.65,
+   "delta_pct": -1.14
+  },
+  {
+   "recipe": "+ visibility (final)",
+   "indented": true,
+   "FAcc": 0.965,
+   "MPJPE-p": 10.42,
+   "EPE2D-p": 5.5,
+   "Jitter": 2.61,
+   "delta_pct": 0.22
+  }
+ ]
+}

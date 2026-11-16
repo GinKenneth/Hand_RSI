@@ -1,0 +1,31 @@
+{
+ "_comment": "Copy to loopA/endpoints.json (or set RSI_ENDPOINTS_FILE). route -> [base URL, name of its key in keys.env]. Claude routes take an Anthropic-compatible URL; routes whose name starts with 'codex' are driven through the Codex CLI (OpenAI Responses API); 'vision' also serves the agents' image-reading tool. The routes below are the ones rounds/roster.py uses; a route whose key is missing is skipped and the agent falls back to the next route of its chain.",
+ "claude": [
+  "https://YOUR-ANTHROPIC-COMPATIBLE-ENDPOINT",
+  "CLAUDE_KEY"
+ ],
+ "claude_b": [
+  "https://YOUR-SECOND-ANTHROPIC-COMPATIBLE-ENDPOINT",
+  "CLAUDE_B_KEY"
+ ],
+ "codex": [
+  "https://YOUR-OPENAI-RESPONSES-ENDPOINT/v1",
+  "CODEX_KEY"
+ ],
+ "codex_b": [
+  "https://YOUR-SECOND-OPENAI-RESPONSES-ENDPOINT/v1",
+  "CODEX_B_KEY"
+ ],
+ "gpt": [
+  "https://YOUR-ANTHROPIC-COMPATIBLE-GPT-ENDPOINT",
+  "GPT_KEY"
+ ],
+ "compat": [
+  "https://YOUR-ANTHROPIC-COMPATIBLE-ENDPOINT",
+  "COMPAT_KEY"
+ ],
+ "vision": [
+  "https://YOUR-ANTHROPIC-COMPATIBLE-ENDPOINT",
+  "VISION_KEY"
+ ]
+}

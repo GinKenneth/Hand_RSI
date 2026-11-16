@@ -1,0 +1,280 @@
+{
+ "_doc": "Loop A per round (supp Loop A table: agents, submissions, acceptances, output tokens, turns) and the module families of the final harness (main Sec. 4.3).",
+ "loopA": {
+  "R1": {
+   "agents": 8,
+   "models": [
+    "claude-opus-5-5",
+    "gpt-6-sol"
+   ],
+   "val_submissions": 53,
+   "accepted": 43,
+   "dev_prechecks": 55,
+   "output_tokens": 1668842,
+   "turns": 663,
+   "best_accepted_S": 3.2,
+   "per_model": {
+    "gpt-6-sol": {
+     "val": 32,
+     "acc": 29
+    },
+    "claude-opus-5-5": {
+     "val": 21,
+     "acc": 14
+    }
+   }
+  },
+  "R2": {
+   "agents": 8,
+   "models": [
+    "claude-opus-5-5",
+    "gpt-6-sol"
+   ],
+   "val_submissions": 13,
+   "accepted": 6,
+   "dev_prechecks": 13,
+   "output_tokens": 2036200,
+   "turns": 842,
+   "best_accepted_S": 1.81,
+   "per_model": {
+    "gpt-6-sol": {
+     "val": 4,
+     "acc": 2
+    },
+    "claude-opus-5-5": {
+     "val": 9,
+     "acc": 4
+    }
+   }
+  },
+  "R3": {
+   "agents": 8,
+   "models": [
+    "claude-opus-5-5",
+    "gpt-6-sol"
+   ],
+   "val_submissions": 14,
+   "accepted": 12,
+   "dev_prechecks": 15,
+   "output_tokens": 2018416,
+   "turns": 812,
+   "best_accepted_S": 1.38,
+   "per_model": {
+    "claude-opus-5-5": {
+     "val": 5,
+     "acc": 3
+    },
+    "gpt-6-sol": {
+     "val": 9,
+     "acc": 9
+    }
+   }
+  },
+  "R4": {
+   "agents": 8,
+   "models": [
+    "claude-opus-5-5",
+    "gpt-6-sol"
+   ],
+   "val_submissions": 12,
+   "accepted": 9,
+   "dev_prechecks": 14,
+   "output_tokens": 1771128,
+   "turns": 1122,
+   "best_accepted_S": 1.15,
+   "per_model": {
+    "claude-opus-5-5": {
+     "val": 4,
+     "acc": 3
+    },
+    "gpt-6-sol": {
+     "val": 8,
+     "acc": 6
+    }
+   }
+  },
+  "R5": {
+   "agents": 8,
+   "models": [
+    "claude-opus-5-5",
+    "gpt-6-sol",
+    "kimi-k3-1-pro-261024"
+   ],
+   "val_submissions": 6,
+   "accepted": 3,
+   "dev_prechecks": 7,
+   "output_tokens": 1186697,
+   "turns": 934,
+   "best_accepted_S": 0.6,
+   "per_model": {
+    "claude-opus-5-5": {
+     "val": 2,
+     "acc": 1
+    },
+    "gpt-6-sol": {
+     "val": 2,
+     "acc": 1
+    },
+    "kimi-k3-1-pro-261024": {
+     "val": 2,
+     "acc": 1
+    }
+   }
+  },
+  "per_model_total": {
+   "gpt-6-sol": {
+    "val": 55.0,
+    "acc": 47.0,
+    "output_tokens": 4801569.0,
+    "turns": 32.0
+   },
+   "claude-opus-5-5": {
+    "val": 41.0,
+    "acc": 25.0,
+    "output_tokens": 3687504.0,
+    "turns": 4059.0
+   },
+   "kimi-k3-1-pro-261024": {
+    "val": 2.0,
+    "acc": 1.0,
+    "output_tokens": 192210.0,
+    "turns": 282.0
+   }
+  }
+ },
+ "module_families": {
+  "cat": {
+   "det": [
+    "edge_rescue",
+    "a1__edge_rescue",
+    "a1__visibility_gate",
+    "a4__a1__visibility_gate",
+    "a1__border_decide",
+    "a5__border_presence"
+   ],
+   "temp": [
+    "temporal_pose",
+    "pose_temporal",
+    "temporal_consistency",
+    "temporal_refine",
+    "root_trajectory",
+    "adaptive_root",
+    "a5__keyframe_smooth"
+   ],
+   "place": [
+    "visibility_placement",
+    "anchor_consensus",
+    "anchor_consistency",
+    "anchor_fuse",
+    "image_anchor_balance",
+    "rigid_placement",
+    "root_source",
+    "a8__relative_anchors",
+    "anchor_reference",
+    "anchor_image_translation",
+    "image_anchor_band",
+    "temporal_anchor_translation",
+    "a1__edge_anchor",
+    "image_motion_refine",
+    "a3__kp2d_final"
+   ],
+   "shape": [
+    "shape_prior",
+    "a2__shape_prior",
+    "a3__shape_prior",
+    "temporal_shape_prior",
+    "shape_from_anchors",
+    "hand_scale",
+    "hand_size",
+    "a8__shape_consensus",
+    "a1__bimanual_size"
+   ],
+   "artic": [
+    "temporal_articulation",
+    "a8__image_articulation",
+    "image_articulation_band",
+    "anchor_pose_fit",
+    "a7__reliable_pose_fit",
+    "a8__oos_raw_articulation",
+    "truncated_finger_raw",
+    "a8__projection_rotation",
+    "go_bandpass"
+   ],
+   "img": [
+    "wilor"
+   ]
+  },
+  "rows": [
+   [
+    1,
+    {
+     "temp": 5,
+     "shape": 4,
+     "place": 4,
+     "artic": 1,
+     "img": 1,
+     "det": 3
+    },
+    18,
+    18,
+    0
+   ],
+   [
+    2,
+    {
+     "temp": 6,
+     "shape": 6,
+     "place": 6,
+     "artic": 2,
+     "img": 1,
+     "det": 3
+    },
+    24,
+    8,
+    2
+   ],
+   [
+    3,
+    {
+     "temp": 6,
+     "shape": 8,
+     "place": 9,
+     "artic": 4,
+     "img": 1,
+     "det": 4
+    },
+    32,
+    9,
+    1
+   ],
+   [
+    4,
+    {
+     "place": 13,
+     "temp": 7,
+     "shape": 5,
+     "artic": 7,
+     "img": 1,
+     "det": 4
+    },
+    37,
+    10,
+    5
+   ],
+   [
+    5,
+    {
+     "place": 13,
+     "temp": 7,
+     "shape": 5,
+     "artic": 8,
+     "img": 1,
+     "det": 5
+    },
+    39,
+    3,
+    1
+   ]
+  ]
+ }
+}

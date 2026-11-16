@@ -1,0 +1,358 @@
+{
+ "modules": [
+  {
+   "name": "anchor_reference",
+   "enabled": true,
+   "params": {}
+  },
+  {
+   "name": "root_trajectory",
+   "enabled": true,
+   "params": {
+    "strength": 30,
+    "max_shift": 0.02,
+    "direct_weight": 0.25,
+    "order": 3
+   }
+  },
+  {
+   "name": "visibility_placement",
+   "enabled": true,
+   "params": {
+    "max_shift": 0.01,
+    "confidence_weight": true,
+    "temporal_sigma": 1.0,
+    "visibility_temperature": 2.0,
+    "partial_power": 2.0
+   }
+  },
+  {
+   "name": "temporal_consistency",
+   "enabled": true,
+   "params": {
+    "strength": 1.0,
+    "transl_strength": 10.0,
+    "direct_wrist_weight": 0.25,
+    "wrist_strength": 10.0
+   }
+  },
+  {
+   "name": "temporal_anchor_translation",
+   "enabled": true,
+   "params": {
+    "weight": 0.1,
+    "strength": 10.0,
+    "ridge": 10.0,
+    "confidence_weight": 0.2
+   }
+  },
+  {
+   "name": "wilor",
+   "enabled": true,
+   "params": {
+    "alpha": 0.25,
+    "gate": 0.25,
+    "sig": 1.5,
+    "perspective_crop": true,
+    "box_scale": 1.4,
+    "go_source": "plain",
+    "go_box_scale": 1.4
+   }
+  },
+  {
+   "name": "temporal_refine",
+   "enabled": true,
+   "params": {
+    "go_sigma": 2.0,
+    "go_deg": 2,
+    "hp_sigma": 2.0,
+    "hp_deg": 2,
+    "tr_sigma": 2.0,
+    "tr_deg": 2,
+    "kp2d_sigma": 1.5,
+    "kp2d_deg": 2
+   }
+  },
+  {
+   "name": "anchor_fuse",
+   "enabled": true,
+   "params": {
+    "w_direct": 0.5,
+    "wilor_weights": [
+     0.0,
+     0.15,
+     0.3,
+     0.4,
+     0.45
+    ]
+   }
+  },
+  {
+   "name": "go_bandpass",
+   "enabled": true,
+   "params": {
+    "s1": 2.0,
+    "s2": 16.0,
+    "beta": 0.5,
+    "tau": 16.0,
+    "lp_w": 0.2
+   }
+  },
+  {
+   "name": "rigid_placement",
+   "enabled": true,
+   "params": {
+    "translation_prior": 100.0,
+    "rotation_prior": 0.5,
+    "correction_sigma": 5.0,
+    "raw_weight": 0.5,
+    "root_strength": 3.0,
+    "max_shift": 0.02,
+    "projection_weight": 0.375
+   }
+  },
+  {
+   "name": "adaptive_root",
+   "enabled": true,
+   "params": {
+    "strength": 16.0,
+    "acceleration_scale": 0.0005,
+    "raw_weight": 0.25,
+    "max_shift": 0.01
+   }
+  },
+  {
+   "name": "shape_from_anchors",
+   "enabled": true,
+   "params": {
+    "stride": 5,
+    "shape_prior": 0.0003,
+    "max_shape": 0.5
+   }
+  },
+  {
+   "name": "a8__shape_consensus",
+   "enabled": true,
+   "params": {
+    "blend": 0.75,
+    "prior": 0.1,
+    "steps": 12,
+    "palm_only": true,
+    "keep_wrist": true,
+    "boundary_guard": true,
+    "max_change": 0.5,
+    "max_total": 2.2
+   }
+  },
+  {
+   "name": "hand_size",
+   "enabled": true,
+   "params": {
+    "w_raw": 0.5,
+    "w_wilor": 0.5,
+    "a": 1.0,
+    "bias": 0.0,
+    "clip": 0.15,
+    "min_frames": 5,
+    "all_frames": true,
+    "guard": true
+   }
+  },
+  {
+   "name": "a8__projection_rotation",
+   "enabled": true,
+   "params": {
+    "prior": 20,
+    "alpha": 0.5,
+    "sigma": 3,
+    "low_sigma": 32,
+    "carry_frames": 10,
+    "boundary_fade": 0.25,
+    "boundary_guard": true
+   }
+  },
+  {
+   "name": "a8__image_articulation",
+   "enabled": true,
+   "params": {
+    "prior": 3,
+    "shared": false,
+    "steps": 12,
+    "samples": 16,
+    "max_degrees": 5,
+    "carry_frames": 15,
+    "sigma": 3,
+    "components": 15,
+    "robust_scale": 0.25,
+    "alpha": 1.0
+   }
+  },
+  {
+   "name": "a8__relative_anchors",
+   "enabled": true,
+   "params": {
+    "relative": true,
+    "weight": 0.5,
+    "max_pixels": 3
+   }
+  },
+  {
+   "name": "root_source",
+   "enabled": true,
+   "params": {
+    "direct_weight": 0.15,
+    "strength": 100.0,
+    "acceleration_scale": 0.0003,
+    "blend": 0.8,
+    "max_shift": 0.02,
+    "visibility_mode": "soft",
+    "visibility_sigma": 1.0,
+    "overlap_gate": true,
+    "overlap_sigma": 2.0,
+    "joint_acceleration": true,
+    "uncertainty_scale": 0.01
+   }
+  },
+  {
+   "name": "a1__border_decide",
+   "enabled": true,
+   "params": {
+    "sigma": 0.0,
+    "drop": [
+     [
+      3,
+      0.01,
+      10.0
+     ]
+    ],
+    "rescue": [
+     [
+      0.05,
+      0.2
+     ],
+     [
+      0.1,
+      0.4
+     ]
+    ],
+    "margin_px": 1.0,
+    "max_shift_m": 0.05,
+    "exist_floor": 0.5
+   }
+  },
+  {
+   "name": "a1__visibility_gate",
+   "enabled": true,
+   "params": {
+    "vis_thr": 0.02,
+    "sigma": 1.0,
+    "exist_floor": 0.5,
+    "min_joints_in": 1
+   }
+  },
+  {
+   "name": "anchor_image_translation",
+   "enabled": true,
+   "params": {
+    "reference_weight": 0.25,
+    "reference_cap": 2.0,
+    "reference_sigma": 3.0,
+    "image_weight": 0.25,
+    "image_cap": 10.0,
+    "shape_gate": 8.0
+   }
+  },
+  {
+   "name": "image_articulation_band",
+   "enabled": true,
+   "params": {
+    "interior": true,
+    "sigma_near": 4,
+    "sigma_far": 24,
+    "weight": 0.5,
+    "agreement_deg": 25,
+    "cap_deg": 5
+   }
+  },
+  {
+   "name": "image_anchor_band",
+   "enabled": true,
+   "params": {
+    "sigma_near": 1,
+    "sigma_far": 8,
+    "weight": 0.25,
+    "agreement_px": 12,
+    "cap": 8
+   }
+  },
+  {
+   "name": "a1__bimanual_size",
+   "enabled": true,
+   "params": {
+    "lam": 0.75,
+    "eps": 0.0001,
+    "clip": 0.08,
+    "tau": 0.01,
+    "min_frames": 5,
+    "guard": true
+   }
+  },
+  {
+   "name": "a5__keyframe_smooth",
+   "enabled": true,
+   "params": {
+    "stride": 4,
+    "beta": 0.5,
+    "lam": 0.017,
+    "adapt": 0.00138,
+    "lo": 0.25,
+    "hi": 4.0,
+    "pw": 0.5,
+    "rho": 1.0,
+    "iters": 300,
+    "min_knots": 4,
+    "min_run": 8,
+    "max_shift": 0.02,
+    "guard": true
+   }
+  },
+  {
+   "name": "a8__oos_raw_articulation",
+   "enabled": true,
+   "params": {
+    "fade_frames": 4.0
+   }
+  },
+  {
+   "name": "truncated_finger_raw",
+   "enabled": true,
+   "params": {
+    "weight": 0.5,
+    "min_out": 1,
+    "w_sigma": 3,
+    "d_sigma": 2
+   }
+  },
+  {
+   "name": "a3__kp2d_final",
+   "enabled": true,
+   "params": {
+    "w_proj": 0.0,
+    "w_lo": 0.25,
+    "lo_sigma": 4.0,
+    "clip": true,
+    "max_px": 8.0
+   }
+  },
+  {
+   "name": "a5__border_presence",
+   "enabled": true,
+   "params": {
+    "max_in": 3,
+    "dis_min": 0.5,
+    "e2_max": 0.2,
+    "exist_floor": 0.5
+   }
+  }
+ ]
+}

@@ -1,0 +1,321 @@
+#!/usr/bin/env python3
+"""agent tools (run inside the sandbox; only the dev split of each dataset is visible: GT + raw network captures).
+
+  lt replay [--seqs A,B] [--ds hot3d,arctic]   run ./tree on dev (every dataset), score it vs the parent: composite S
+                                per dataset + their mean (as the gate computes it) + every metric
+  lt try [--seqs A,B] [--ds ...] replay + full 3D diagnosis vs the parent, in one call
+  lt diagnose [RUN] [--ds hot3d] [--vs RUN|parent] [--n 15]   3D anatomy: per-joint / per-finger error, misses by how
+                                many joints are in frame, false positives, worst hand-frames by MPJPE / CT / GO, what changed
+  lt report [RUN]               print the stored summary of a run (default: latest)
+  lt bucket [--round R] [--kind K] [--grep W] [--all] [--show ID]
+                                the shared, cross-round record: every gate verdict of every agent (note, diff, dev deltas),
+                                agents' notes and transcripts, merge steps, round verdicts, Loop C's plans
+  lt ideas                      this round's idea cards from Loop C (the research lead), with references
+  lt lit search "QUERY" [--n 10]          arXiv search (title, date, id, abstract)
+  lt lit read ARXIV_ID                    full text (arXiv HTML, else the abstract) -> refs/papers/<id>.txt
+  lt code search "QUERY" [--n 10]         GitHub repository search
+  lt code get OWNER/REPO [--ref BRANCH]   source code only (no weights / data / archives; <= 1 MB per file, 30 MB total)
+                                          -> refs/code/<owner>__<repo>/ ; then read it with grep / sed / cat
+  lt submit "what you changed and why (cite papers / code you used)"   send ./tree to the gate; waits for the verdict
+  lt status                     gate budget and your submission history
+
+The tree is ./tree: chain.json (ordered modules, params, enabled) + modules/<name>.py, each `apply(state, seg, params)`
+(see harness/core.py for the exact contract). A module sees one 81-frame segment only.
+Only .py / .json / .md files may be in the tree (<= 1 MB): no downloaded weights or data.
+"""
+import argparse, io, json, os, re, shutil, subprocess, sys, tarfile, time, urllib.parse, urllib.request
+from html.parser import HTMLParser
+from pathlib import Path
+
+WS = Path(os.environ['LOOPA_WS']); RUNS = WS / 'runs'; SPOOL = Path(os.environ.get('LOOPA_SPOOL', WS / 'spool'))
+if os.environ.get('LOOPA_DATASETS'):
+    DS = json.loads(os.environ['LOOPA_DATASETS'])
+else:                                                          # single-dataset environment (older drivers)
+    DS = {'hot3d': dict(dev_view=os.environ['LOOPA_DEV_VIEW'], dev_cache=os.environ['LOOPA_DEV_CACHE'],
+                        parent_dev=os.environ['LOOPA_PARENT_DEV'])}
+JOBS = os.environ.get('LOOPA_JOBS', '16'); CAP = int(os.environ.get('LOOPA_OUTPUT_CAP', '40000'))
+PY = os.environ.get('LOOPA_PY', sys.executable); SOTA = str(Path(__file__).resolve().parents[2])
+REFS = WS / 'refs'; LITLOG = WS / 'lit_log.jsonl'
+UA = {'User-Agent': 'rsi-sota-lt/1.0 (research; arXiv/GitHub read-only)'}
+CODE_EXT = {'.py', '.pyx', '.c', '.cc', '.cpp', '.h', '.hpp', '.cu', '.m', '.md', '.txt', '.rst', '.yaml', '.yml',
+            '.json', '.toml', '.cfg', '.ini', '.sh', '.ipynb'}
+
+
+def sh(args, **kw):
+    # one BLAS / OpenMP thread per process: the replay's parallelism is its worker pool (library default: a thread per
+    # core; R1 Loop A ran ~24k threads on 384 cores, replays 10-20x slower)
+    env = dict(os.environ, PYTHONPATH=SOTA, OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1',
+               NUMEXPR_NUM_THREADS='1')
+    return subprocess.run(args, env=env, text=True, capture_output=True, **kw)
+
+
+def ds_list(arg):
+    return [d for d in (arg.split(',') if arg else DS) if d in DS]
+
+
+def run_no(p):
+    return int(p.name[1:]) if p.name[1:].isdigit() else -1
+
+
+def latest_run():
+    runs = sorted(RUNS.glob('r*'), key=run_no)
+    if not runs:
+        sys.exit('no run yet: use `lt replay`')
+    return runs[-1]
+
+
+def resolve(name):
+    if name in (None, '', 'latest'):
+        return latest_run()
+    if name == 'parent':
+        return 'parent'
+    p = RUNS / name
+    return p if p.is_dir() else Path(name)
+
+
+def pred_dir(run, ds):
+    if run == 'parent':
+        return Path(DS[ds]['parent_dev'])
+    for c in (run / ds / 'pred', run / 'pred'):
+        if c.is_dir():
+            return c
+    return run
+
+
+def replay(seqs, dss):
+    RUNS.mkdir(exist_ok=True)
+    k = 1 + max([run_no(p) for p in RUNS.glob('r*')] or [0])
+    out = RUNS / f'r{k}'
+    shutil.copytree(WS / 'tree', out / 'tree_snapshot', ignore=shutil.ignore_patterns('__pycache__'))
+    t0, lines, S = time.time(), [], {}
+    for ds in dss:
+        d = DS[ds]; o = out / ds
+        cmd = [PY, '-m', 'harness.run', '--tree', str(out / 'tree_snapshot'), '--cache', d['dev_cache'], '--view', d['dev_view'],
+               '--out', str(o / 'pred'), '--jobs', JOBS]
+        if seqs:
+            cmd += ['--seqs', seqs]
+        r = sh(cmd, cwd=SOTA)
+        if r.returncode:
+            print((r.stdout + r.stderr)[-6000:])
+            sys.exit(f'replay r{k} crashed on {ds} (fix the module; nothing was scored)')
+        names = sorted(p.stem for p in (o / 'pred').glob('*.npz'))
+        if not names:
+            lines.append(f'[{ds}] no segment matched --seqs'); continue
+        (o / 'segments.txt').write_text('\n'.join(names) + '\n')
+        s = sh([PY, '-m', 'eval.score', '--gt', str(Path(d['dev_view']) / 'gt'), '--pred', str(o / 'pred'), '--ref', d['parent_dev'],
+                '--segs', str(o / 'segments.txt'), '--boot', '500', '--out', str(o / 'score.json')], cwd=SOTA)
+        txt = (s.stdout + s.stderr).replace('-> PASS', '(dev: S vs parent)').replace('-> FAIL', '(dev: S vs parent)')
+        lines.append(f'[{ds}] {len(names)} dev segments\n{txt.strip()}')
+        try:
+            S[ds] = json.loads((o / 'score.json').read_text())['compare']['S']
+        except Exception:                                       # noqa: BLE001
+            pass
+    gate_s = f"gate S (HOT3D) {100 * S['hot3d']:+.2f}% " if 'hot3d' in S else ''
+    summary = (f'run r{k} ({time.time() - t0:.0f}s): {gate_s}(the gate scores S on HOT3D only, and on EVERY dataset requires '
+               f'that no column gets significantly worse than 2% or worse than 5% at all)\n' + '\n'.join(lines))
+    (out / 'summary.txt').write_text(summary + '\n')
+    print(summary[:CAP])
+    return out
+
+
+def cmd_replay(a):
+    replay(a.seqs, ds_list(a.ds))
+
+
+def cmd_try(a):
+    out = replay(a.seqs, ds_list(a.ds))
+    for ds in ds_list(a.ds):
+        print(f'\n######## diagnosis: {ds} ########')
+        cmd_diagnose(argparse.Namespace(run=str(out), vs='parent', n=10, ds=ds))
+
+
+def cmd_diagnose(a):
+    run = resolve(a.run)
+    for ds in ds_list(a.ds):
+        pred = pred_dir(run, ds)
+        gt = Path(DS[ds]['dev_view']) / 'gt'
+        segs = (run / ds / 'segments.txt') if run != 'parent' else None
+        if segs and segs.is_file() and len(segs.read_text().split()) < len(list(gt.glob('*.npz'))):  # partial replay
+            sub = run / ds / 'gt_subset'
+            sub.mkdir(exist_ok=True)
+            for n in segs.read_text().split():
+                if not (sub / f'{n}.npz').exists():
+                    os.symlink(gt / f'{n}.npz', sub / f'{n}.npz')
+            gt = sub
+        js = (run / ds / 'diagnose.json') if run != 'parent' else WS / f'diagnose_parent_{ds}.json'
+        cmd = [PY, '-m', 'eval.diagnose', '--gt', str(gt), '--pred', str(pred), '--n', str(a.n), '--json', str(js)]
+        if a.vs:
+            vs = resolve(a.vs)
+            cmd += ['--vs', str(pred_dir(vs, ds))]
+        r = sh(cmd, cwd=SOTA)
+        print(f'[{ds}]\n' + (r.stdout + r.stderr)[:CAP])
+
+
+def cmd_report(a):
+    print((resolve(a.run) / 'summary.txt').read_text()[:CAP])
+
+
+def cmd_bucket(a):
+    args = [PY, f'{SOTA}/rounds/bucket.py']
+    for k in ('round', 'kind', 'grep', 'show'):
+        if getattr(a, k):
+            args += [f'--{k}', getattr(a, k)]
+    if a.all:
+        args.append('--all')
+    r = sh(args)
+    print((r.stdout + r.stderr)[:CAP if not a.all else 4 * CAP])
+
+
+def cmd_ideas(a):
+    p = Path(os.environ.get('LOOPA_IDEAS', '/nonexistent'))
+    print(p.read_text()[:CAP] if p.is_file() else '(no idea cards this round: Loop C has not run yet)')
+
+
+# ---------------------------------------------------------------- literature and code (read-only, logged)
+def fetch(url, timeout=60):
+    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout) as r:
+        return r.read()
+
+
+def litlog(**kw):
+    with open(LITLOG, 'a') as f:
+        f.write(json.dumps(dict(time=time.strftime('%F %T'), **kw)) + '\n')
+
+
+class _Text(HTMLParser):
+    SKIP = {'script', 'style', 'nav', 'header', 'footer', 'math', 'annotation'}
+
+    def __init__(self):
+        super().__init__(); self.out, self.skip = [], 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.SKIP:
+            self.skip += 1
+        if tag in ('p', 'div', 'h1', 'h2', 'h3', 'h4', 'li', 'tr', 'br', 'section', 'figcaption'):
+            self.out.append('\n')
+
+    def handle_endtag(self, tag):
+        if tag in self.SKIP and self.skip:
+            self.skip -= 1
+
+    def handle_data(self, d):
+        if not self.skip:
+            self.out.append(d)
+
+
+def cmd_lit(a):
+    if a.op == 'search':
+        q = urllib.parse.quote(a.query)
+        xml = fetch(f'https://export.arxiv.org/api/query?search_query=all:{q}&start=0&max_results={a.n}'
+                    f'&sortBy=relevance').decode()
+        ents = re.findall(r'<entry>(.*?)</entry>', xml, re.S)
+        litlog(op='lit search', query=a.query, hits=len(ents))
+        for e in ents:
+            g = lambda t: re.sub(r'\s+', ' ', (re.search(rf'<{t}[^>]*>(.*?)</{t}>', e, re.S) or [None, ''])[1]).strip()  # noqa: E731
+            aid = g('id').rsplit('/abs/', 1)[-1]
+            auth = ', '.join(re.findall(r'<name>(.*?)</name>', e)[:4])
+            print(f"- {aid} ({g('published')[:10]}) {g('title')}\n  {auth}\n  {g('summary')[:600]}\n")
+        return
+    aid = re.sub(r'^.*abs/|v\d+$', '', a.query.strip())
+    REFS.joinpath('papers').mkdir(parents=True, exist_ok=True)
+    dst = REFS / 'papers' / f'{aid.replace("/", "_")}.txt'
+    text, src = '', ''
+    for url in (f'https://arxiv.org/html/{aid}', f'https://arxiv.org/abs/{aid}'):
+        try:
+            p = _Text(); p.feed(fetch(url).decode(errors='replace'))
+            text = re.sub(r'\n\s*\n+', '\n\n', ''.join(p.out)).strip(); src = url
+            if len(text) > 3000 or 'abs/' in url:
+                break
+        except Exception as e:                                    # noqa: BLE001
+            text, src = f'(fetch failed: {e})', url
+    dst.write_text(f'source: {src}\n\n{text}\n')
+    litlog(op='lit read', id=aid, source=src, chars=len(text), file=str(dst))
+    print(f'{len(text)} chars from {src} -> {dst}\n\n{text[:min(CAP, 12000)]}')
+
+
+def cmd_code(a):
+    if a.op == 'search':
+        q = urllib.parse.quote(a.query)
+        try:
+            d = json.loads(fetch(f'https://api.github.com/search/repositories?q={q}&per_page={a.n}'))
+        except Exception as e:                                    # noqa: BLE001
+            sys.exit(f'GitHub search failed ({e}); the unauthenticated limit is 10 searches/min: wait and retry')
+        litlog(op='code search', query=a.query, hits=d.get('total_count'))
+        for r in d.get('items', []):
+            print(f"- {r['full_name']}  ★{r['stargazers_count']}  updated {r['updated_at'][:10]}  "
+                  f"license {((r.get('license') or {}).get('spdx_id'))}\n  {(r.get('description') or '')[:300]}")
+        return
+    repo = a.query.strip().strip('/')
+    if not re.fullmatch(r'[\w.-]+/[\w.-]+', repo):
+        sys.exit('use OWNER/REPO')
+    dst = REFS / 'code' / repo.replace('/', '__')
+    if dst.is_dir():
+        print(f'already fetched: {dst}'); return
+    raw = fetch(f'https://codeload.github.com/{repo}/tar.gz/{a.ref}', timeout=300)
+    kept = skipped = total = 0
+    with tarfile.open(fileobj=io.BytesIO(raw), mode='r:gz') as tf:
+        for m in tf.getmembers():
+            if not m.isfile():
+                continue
+            rel = Path(*Path(m.name).parts[1:])
+            if Path(m.name).suffix.lower() not in CODE_EXT or m.size > (1 << 20) or total + m.size > 30 * (1 << 20):
+                skipped += 1; continue
+            t = dst / rel; t.parent.mkdir(parents=True, exist_ok=True)
+            t.write_bytes(tf.extractfile(m).read()); kept += 1; total += m.size
+    lic = next((p for p in dst.glob('LICENSE*')), None)
+    litlog(op='code get', repo=repo, ref=a.ref, files=kept, skipped=skipped, bytes=total, dir=str(dst),
+           license=lic.read_text(errors='replace')[:80] if lic else None)
+    print(f'{repo}: {kept} source files ({total / 1e6:.1f} MB) -> {dst}; {skipped} non-code / large files dropped. '
+          f'License: {lic.read_text(errors="replace").splitlines()[0] if lic else "none found"}. '
+          'Cite what you use in your submit note; never copy weights or data.')
+
+
+def cmd_submit(a):
+    SPOOL.mkdir(exist_ok=True)
+    pend = [p for p in SPOOL.glob('req_*') if not (p / 'verdict.json').is_file()]
+    if pend and os.environ.get('LOOPA_ONE_PENDING') == '1':
+        sys.exit(f'{pend[0].name} is still waiting for its verdict (lt status); submit your next change after it.')
+    mx = int(os.environ.get('LOOPA_MAX_PENDING', '0') or 0)      # at most this many waiting requests per agent
+    if mx and len(pend) >= mx:
+        sys.exit(f'{len(pend)} of your requests are still waiting for the gate ({", ".join(sorted(p.name for p in pend))}); '
+                 f'at most {mx} may wait at once. Submit your next change after a verdict (lt status).')
+    k = 1 + max([int(p.name[4:]) for p in SPOOL.glob('req_*') if p.name[4:].isdigit()] or [0])
+    req = SPOOL / f'req_{k}'
+    shutil.copytree(WS / 'tree', req / 'tree', ignore=shutil.ignore_patterns('__pycache__', 'runs'))
+    (req / 'request.json').write_text(json.dumps(dict(note=a.note, submitted=time.strftime('%F %T'))))
+    (req / 'READY').touch()
+    print(f'submitted req_{k}; waiting for the gate (dev pre-check, then the hidden val split) ...', flush=True)
+    while not (req / 'verdict.json').is_file():
+        time.sleep(20)
+    print(json.dumps(json.loads((req / 'verdict.json').read_text()), indent=1))
+
+
+def cmd_status(a):
+    st = Path(os.environ.get('LOOPA_STATE', '/nonexistent'))
+    if st.is_file():
+        print(st.read_text()[:CAP])
+    for p in sorted(SPOOL.glob('req_*'), key=lambda p: int(p.name[4:]) if p.name[4:].isdigit() else 0):
+        v = json.loads((p / 'verdict.json').read_text()) if (p / 'verdict.json').is_file() else {'status': 'pending'}
+        print(p.name, json.loads((p / 'request.json').read_text())['note'][:120], '->', json.dumps(v)[:400])
+
+
+ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+sub = ap.add_subparsers(dest='c', required=True)
+p = sub.add_parser('replay'); p.add_argument('--seqs', default=''); p.add_argument('--ds', default='')
+p = sub.add_parser('try'); p.add_argument('--seqs', default=''); p.add_argument('--ds', default='')
+p = sub.add_parser('diagnose'); p.add_argument('run', nargs='?'); p.add_argument('--vs', default=None)
+p.add_argument('--n', type=int, default=15); p.add_argument('--ds', default='')
+p = sub.add_parser('report'); p.add_argument('run', nargs='?')
+p = sub.add_parser('bucket')
+for k in ('--round', '--kind', '--grep', '--show'):
+    p.add_argument(k)
+p.add_argument('--all', action='store_true')
+sub.add_parser('ideas')
+p = sub.add_parser('lit'); p.add_argument('op', choices=['search', 'read']); p.add_argument('query'); p.add_argument('--n', type=int, default=10)
+p = sub.add_parser('code'); p.add_argument('op', choices=['search', 'get']); p.add_argument('query')
+p.add_argument('--n', type=int, default=10); p.add_argument('--ref', default='HEAD')
+p = sub.add_parser('submit'); p.add_argument('note')
+sub.add_parser('status')
+a = ap.parse_args()
+dict(replay=cmd_replay, try_=cmd_try, diagnose=cmd_diagnose, report=cmd_report, bucket=cmd_bucket, ideas=cmd_ideas,
+     lit=cmd_lit, code=cmd_code, submit=cmd_submit, status=cmd_status)[a.c.replace('try', 'try_')](a)
